@@ -19,6 +19,7 @@ const Model = () => import('@/views/model/index.vue')
 const DataMart = () => import('@/views/data_mart/index.vue')
 const Export = () => import('@/views/export/index.vue')
 const Audit = () => import('@/views/audit/index.vue')
+const HierarchyHealth = () => import('@/views/hierarchy_health/index.vue')
 
 const router = createRouter({
   history: createWebHistory(),
@@ -42,6 +43,7 @@ const router = createRouter({
     { path: '/data_mart', name: 'data_mart', component: DataMart },
     { path: '/export', name: 'export', component: Export },
     { path: '/audit', name: 'audit', component: Audit },
+    { path: '/hierarchy_health', name: 'hierarchy_health', component: HierarchyHealth },
   ],
 })
 

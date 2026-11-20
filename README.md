@@ -67,6 +67,25 @@ npm run dev
 | 数据集市 | `data_mart` | 集市表 | 表编号、表名称、主题域 |
 | 数据导出 | `export` | 导出任务 | 任务编号、导出对象、导出格式 |
 | 数据审计 | `audit` | 审计记录 | 记录编号、操作类型、操作人 |
+| 层级体检 | `hierarchy_health` | 体检批次 | 批次编号、问题组、受牵连叶子、结账差异 |
+
+## 层级体检
+
+月度地区等级结账前，向 `POST /api/hierarchy_health/batches` 提交两期维度数据
+（`nodes` 节点清单 + `edges` 父子边，方向为父→子），系统会：
+
+- 用 Tarjan 强连通分量找出运算报错的最小闭环（自环、两节点互指均可识别），
+  并保留环上的每条边；
+- 诊断父级丢失（父节点两期均未登记的断链边）与代码错位（两期都在的节点
+  更换了仍存在的旧父级）；
+- 沿父子边求受牵连叶子及其原始上报路径；叶子同时挂多个问题组时，影响数量
+  按叶子编号去重，闭环/断链阻断的待定子树计入影响结账覆盖；
+- 按维度断链影响表为每个受牵连叶子生成「待核验」结账差异，并镜像到数据审计模块；
+- `POST /api/hierarchy_health/batches/{id}/corrections` 按父子边更正后重算全图：
+  解挂叶子的差异转为「已核验」，未被修改的叶子与仍挂起的子树原样保留。
+
+后端纯标准库图引擎在 `backend/app/services/hierarchy_graph.py`，
+端到端测试在 `backend/tests/test_hierarchy_health.py`（`python -m tests.test_hierarchy_health`）。
 
 ## 约定
 
